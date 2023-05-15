@@ -143,7 +143,7 @@ public class MainActivity extends AbstractGBActivity implements BottomNavigation
         bottomNavigationView = findViewById(R.id.bottom_nav_bar);
         bottomNavigationView.setOnNavigationItemSelectedListener(this);
         // TODO: read last view from savedInstanceState
-        bottomNavigationView.setSelectedItemId(R.id.bottom_nav_devices);
+        bottomNavigationView.setSelectedItemId(R.id.bottom_nav_dashboard);
 
         IntentFilter filterLocal = new IntentFilter();
         filterLocal.addAction(GBApplication.ACTION_LANGUAGE_CHANGE);
