@@ -126,7 +126,7 @@ public class BangleJSCoordinator extends AbstractBLEDeviceCoordinator {
 
     @Override
     public boolean supportsScreenshots() {
-        return false;
+        return true;
     }
 
     @Override
