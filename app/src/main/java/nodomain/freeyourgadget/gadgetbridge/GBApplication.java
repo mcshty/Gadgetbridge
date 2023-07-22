@@ -1311,7 +1311,7 @@ public class GBApplication extends Application {
         Resources resources = context.getResources();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
-                selectedTheme.equals(context.getString(R.string.pref_theme_value_system))) {
+                (selectedTheme.equals(context.getString(R.string.pref_theme_value_system)) || selectedTheme.equals(context.getString(R.string.pref_theme_value_dynamic)))) {
             return (resources.getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
         } else {
             return selectedTheme.equals(context.getString(R.string.pref_theme_value_dark));
@@ -1320,6 +1320,11 @@ public class GBApplication extends Application {
 
     public static boolean isAmoledBlackEnabled() {
         return prefs.getBoolean("pref_key_theme_amoled_black", false);
+    }
+
+    public static boolean areDynamicColorsEnabled() {
+        String selectedTheme = prefs.getString("pref_key_theme", context.getString(R.string.pref_theme_value_system));
+        return selectedTheme.equals(context.getString(R.string.pref_theme_value_dynamic));
     }
 
     public static int getTextColor(Context context) {

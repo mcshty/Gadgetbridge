@@ -69,7 +69,15 @@ public abstract class AbstractGBActivity extends AppCompatActivity implements GB
     }
 
     public static void init(GBActivity activity, int flags) {
-        if (GBApplication.isDarkThemeEnabled()) {
+        if (GBApplication.areDynamicColorsEnabled()) {
+            if (GBApplication.isDarkThemeEnabled() && GBApplication.isAmoledBlackEnabled()) {
+                activity.setTheme(R.style.GadgetbridgeThemeDynamicDarkAmoled);
+            } else if (GBApplication.isDarkThemeEnabled()) {
+                activity.setTheme(R.style.GadgetbridgeThemeDynamicDark);
+            } else {
+                activity.setTheme(R.style.GadgetbridgeThemeDynamicLight);
+            }
+        } else if (GBApplication.isDarkThemeEnabled()) {
             if ((flags & NO_ACTIONBAR) != 0) {
                 if (GBApplication.isAmoledBlackEnabled())
                     activity.setTheme(R.style.GadgetbridgeThemeBlack_NoActionBar);

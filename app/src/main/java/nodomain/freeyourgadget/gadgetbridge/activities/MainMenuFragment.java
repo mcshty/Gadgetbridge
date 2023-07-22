@@ -31,6 +31,9 @@ public class MainMenuFragment extends Fragment implements NavigationView.OnNavig
 
         NavigationView navigationView = currentView.findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        if (GBApplication.isDarkThemeEnabled() && GBApplication.isAmoledBlackEnabled()) {
+            navigationView.setBackgroundColor(getResources().getColor(android.R.color.black));
+        }
 
         /* This sucks but for the play store we're not allowed a donation link. Instead for
            the Bangle.js Play Store app we put a message in the About dialog via @string/about_description */
