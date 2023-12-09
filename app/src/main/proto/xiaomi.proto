@@ -208,8 +208,8 @@ message Language {
 
 message Widgets {
   repeated Widget widget = 1;
-  optional uint32 unknown2 = 2; // 1
-  optional WidgetsCapabilities widget3 = 3;
+  optional uint32 isFullList = 2; // 1 to set the list
+  optional WidgetsCapabilities widgetsCapabilities = 3; // only in response
 }
 
 message WidgetsCapabilities {
@@ -278,13 +278,13 @@ message CustomVibrationPattern {
 
 message VibrationNotificationType {
   // 1 incoming calls
-  // 2 events
+  // 2 events // TODO confirm which one is events, which one is schedule
   // 3 alarms
   // 4 notifications
   // 5 standing reminder
   // 6 sms
   // 7 goal
-  // 8 events
+  // 8 events // TODO confirm which one is events, which one is schedule
   optional uint32 notificationType = 1;
   optional uint32 preset = 2;
 }

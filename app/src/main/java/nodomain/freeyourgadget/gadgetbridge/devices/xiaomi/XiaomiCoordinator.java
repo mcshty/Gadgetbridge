@@ -28,7 +28,11 @@ import org.apache.commons.lang3.ArrayUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -56,6 +60,7 @@ import nodomain.freeyourgadget.gadgetbridge.model.SleepRespiratoryRateSample;
 import nodomain.freeyourgadget.gadgetbridge.model.Spo2Sample;
 import nodomain.freeyourgadget.gadgetbridge.model.StressSample;
 import nodomain.freeyourgadget.gadgetbridge.service.DeviceSupport;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huami.HuamiVibrationPatternNotificationType;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.xiaomi.XiaomiBleUuids;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.xiaomi.XiaomiPreferences;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.xiaomi.XiaomiSupport;
@@ -385,7 +390,9 @@ public abstract class XiaomiCoordinator extends AbstractBLEDeviceCoordinator {
         //
         settings.add(R.xml.devicesettings_header_notifications);
         // TODO not implemented settings.add(R.xml.devicesettings_display_caller);
-        // TODO not implemented settings.add(R.xml.devicesettings_vibrationpatterns);
+        if (!getVibrationPatternNotificationTypes(device).isEmpty()) {
+            settings.add(R.xml.devicesettings_vibrationpatterns_simple);
+        }
         // TODO not implemented settings.add(R.xml.devicesettings_donotdisturb_withauto_and_always);
         settings.add(R.xml.devicesettings_send_app_notifications);
         settings.add(R.xml.devicesettings_screen_on_on_notifications);
@@ -489,6 +496,18 @@ public abstract class XiaomiCoordinator extends AbstractBLEDeviceCoordinator {
 
     public boolean supportsMultipleWeatherLocations() {
         return false;
+    }
+
+    public Set<HuamiVibrationPatternNotificationType> getVibrationPatternNotificationTypes(final GBDevice device) {
+        final Set<String> stringSet = getPrefs(device).getStringSet(
+                XiaomiPreferences.PREF_VIBRATION_PATTERN_NOTIFICATION_TYPES,
+                Collections.emptySet()
+        );
+        final Set<HuamiVibrationPatternNotificationType> ret = new HashSet<>();
+        for (final String s : stringSet) {
+            ret.add(HuamiVibrationPatternNotificationType.valueOf(s.toUpperCase(Locale.ROOT)));
+        }
+        return ret;
     }
 
     public boolean supportsWearingAndSleepingDataThroughDeviceState() {

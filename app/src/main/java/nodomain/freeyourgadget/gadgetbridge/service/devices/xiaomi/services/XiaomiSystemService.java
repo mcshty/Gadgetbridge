@@ -24,9 +24,11 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
@@ -50,6 +52,8 @@ import nodomain.freeyourgadget.gadgetbridge.model.WearingState;
 import nodomain.freeyourgadget.gadgetbridge.proto.xiaomi.XiaomiProto;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.actions.SetProgressAction;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huami.HuamiVibrationPatternNotificationType;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.xiaomi.XiaomiPreferences;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.xiaomi.XiaomiSupport;
 import nodomain.freeyourgadget.gadgetbridge.util.CheckSums;
 import nodomain.freeyourgadget.gadgetbridge.util.GB;
@@ -77,6 +81,9 @@ public class XiaomiSystemService extends AbstractXiaomiService implements Xiaomi
     public static final int CMD_PASSWORD_SET = 21;
     public static final int CMD_DISPLAY_ITEMS_GET = 29;
     public static final int CMD_DISPLAY_ITEMS_SET = 30;
+    public static final int CMD_VIBRATION_PATTERNS_GET = 46;
+    public static final int CMD_VIBRATION_PATTERNS_SET = 47;
+    public static final int CMD_VIBRATION_PATTERNS_DEL = 61;
     public static final int CMD_DEVICE_STATE_GET = 78;
     public static final int CMD_DEVICE_STATE = 79;
 
@@ -100,6 +107,7 @@ public class XiaomiSystemService extends AbstractXiaomiService implements Xiaomi
         getSupport().sendCommand("get battery state", COMMAND_TYPE, CMD_BATTERY);
         getSupport().sendCommand("get password", COMMAND_TYPE, CMD_PASSWORD_GET);
         getSupport().sendCommand("get display items", COMMAND_TYPE, CMD_DISPLAY_ITEMS_GET);
+        getSupport().sendCommand("get vibration patterns", COMMAND_TYPE, CMD_VIBRATION_PATTERNS_GET);
     }
 
     @Override
@@ -138,6 +146,9 @@ public class XiaomiSystemService extends AbstractXiaomiService implements Xiaomi
                 return;
             case CMD_DISPLAY_ITEMS_GET:
                 handleDisplayItems(cmd.getSystem().getDisplayItems());
+                return;
+            case CMD_VIBRATION_PATTERNS_GET:
+                handleVibrationPatterns(cmd.getSystem().getVibrationPatterns());
                 return;
             case CMD_DEVICE_STATE_GET:
                 handleBasicDeviceState(cmd.getSystem().hasBasicDeviceState()
@@ -457,6 +468,80 @@ public class XiaomiSystemService extends AbstractXiaomiService implements Xiaomi
                 .withPreference(DeviceSettingsUtils.getPrefPossibleValueLabelsKey(HuamiConst.PREF_DISPLAY_ITEMS_SORTABLE), allScreensLabelsPrefValue)
                 .withPreference(PREF_SETTINGS_DISPLAY_ITEM_CODE, settingsCode)
                 .withPreference(HuamiConst.PREF_DISPLAY_ITEMS_SORTABLE, prefValue);
+
+        getSupport().evaluateGBDeviceEvent(eventUpdatePreferences);
+    }
+
+    private void handleVibrationPatterns(final XiaomiProto.VibrationPatterns vibrationPatterns) {
+        LOG.debug("Got {} vibration pattern notification types", vibrationPatterns.getNotificationTypeCount());
+
+        final GBDeviceEventUpdatePreferences eventUpdatePreferences = new GBDeviceEventUpdatePreferences();
+
+        final Set<String> notificationTypesPrefValue = new HashSet<>();
+
+        for (final XiaomiProto.VibrationNotificationType notificationType : vibrationPatterns.getNotificationTypeList()) {
+            final HuamiVibrationPatternNotificationType vibrationPatternNotificationType;
+            switch (notificationType.getNotificationType()) {
+                case 1:
+                    vibrationPatternNotificationType = HuamiVibrationPatternNotificationType.INCOMING_CALL;
+                    break;
+                case 2: // TODO confirm which one is events, which one is schedule
+                    vibrationPatternNotificationType = HuamiVibrationPatternNotificationType.EVENT_REMINDER;
+                    break;
+                case 3:
+                    vibrationPatternNotificationType = HuamiVibrationPatternNotificationType.ALARM;
+                    break;
+                case 4:
+                    vibrationPatternNotificationType = HuamiVibrationPatternNotificationType.APP_ALERTS;
+                    break;
+                case 5:
+                    vibrationPatternNotificationType = HuamiVibrationPatternNotificationType.IDLE_ALERTS;
+                    break;
+                case 6:
+                    vibrationPatternNotificationType = HuamiVibrationPatternNotificationType.INCOMING_SMS;
+                    break;
+                case 7:
+                    vibrationPatternNotificationType = HuamiVibrationPatternNotificationType.GOAL_NOTIFICATION;
+                    break;
+                case 8: // TODO confirm which one is events, which one is schedule
+                    vibrationPatternNotificationType = HuamiVibrationPatternNotificationType.SCHEDULE;
+                    break;
+                default:
+                    LOG.warn("Unknown vibration pattern notification type {}", notificationType.getNotificationType());
+                    continue;
+            }
+
+            final String nameLowercase = vibrationPatternNotificationType.name().toLowerCase(Locale.ROOT);
+            notificationTypesPrefValue.add(nameLowercase);
+
+            eventUpdatePreferences.withPreference(
+                    HuamiConst.PREF_HUAMI_VIBRATION_PROFILE_PREFIX + nameLowercase,
+                    String.valueOf(notificationType.getPreset())
+            );
+        }
+
+        eventUpdatePreferences.withPreference(
+                XiaomiPreferences.PREF_VIBRATION_PATTERN_NOTIFICATION_TYPES,
+                notificationTypesPrefValue
+        );
+
+        final List<String> customPatternIds = new ArrayList<>();
+        final List<String> customPatternNames = new ArrayList<>();
+
+        for (final XiaomiProto.CustomVibrationPattern customPattern : vibrationPatterns.getCustomVibrationPatternList()) {
+            customPatternIds.add(String.valueOf(customPattern.getId()));
+            customPatternNames.add(customPattern.getName().replace(",", ""));
+        }
+
+        eventUpdatePreferences.withPreference(
+                XiaomiPreferences.PREF_VIBRATION_PATTERN_IDS,
+                StringUtils.join(",", customPatternIds.toArray(new String[0])).toString()
+        );
+
+        eventUpdatePreferences.withPreference(
+                XiaomiPreferences.PREF_VIBRATION_PATTERN_NAMES,
+                StringUtils.join(",", customPatternNames.toArray(new String[0])).toString()
+        );
 
         getSupport().evaluateGBDeviceEvent(eventUpdatePreferences);
     }

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <PreferenceScreen
+        android:icon="@drawable/ic_vibration"
+        android:key="vibration_patterns_key"
+        android:persistent="false"
+        android:summary="@string/pref_screen_vibration_patterns_summary"
+        android:title="@string/pref_screen_vibration_patterns_title">
+
+        <PreferenceCategory android:title="@string/notification_types">
+            <ListPreference
+                android:defaultValue="@string/p_default"
+                android:entries="@array/vibration_profile"
+                android:entryValues="@array/vibration_profile_values"
+                android:icon="@drawable/ic_settings_applications"
+                android:key="huami_vibration_profile_app_alerts"
+                android:title="@string/pref_screen_notification_profile_generic"
+                app:useSimpleSummaryProvider="true" />
+
+            <ListPreference
+                android:defaultValue="@string/p_default"
+                android:entries="@array/vibration_profile"
+                android:entryValues="@array/vibration_profile_values"
+                android:icon="@drawable/ic_phone"
+                android:key="huami_vibration_profile_incoming_call"
+                android:title="@string/pref_screen_notification_profile_incoming_call"
+                app:useSimpleSummaryProvider="true" />
+
+            <ListPreference
+                android:defaultValue="@string/p_default"
+                android:entries="@array/vibration_profile"
+                android:entryValues="@array/vibration_profile_values"
+                android:icon="@drawable/ic_message_outline"
+                android:key="huami_vibration_profile_incoming_sms"
+                android:title="@string/pref_screen_notification_profile_sms"
+                app:useSimpleSummaryProvider="true" />
+
+            <ListPreference
+                android:defaultValue="@string/p_default"
+                android:entries="@array/vibration_profile"
+                android:entryValues="@array/vibration_profile_values"
+                android:icon="@drawable/ic_star_gray"
+                android:key="huami_vibration_profile_goal_notification"
+                android:title="@string/mi2_prefs_goal_notification"
+                app:useSimpleSummaryProvider="true" />
+
+            <ListPreference
+                android:defaultValue="@string/p_default"
+                android:entries="@array/vibration_profile"
+                android:entryValues="@array/vibration_profile_values"
+                android:icon="@drawable/ic_access_alarms"
+                android:key="huami_vibration_profile_alarm"
+                android:title="@string/vibration_profile_alarm_clock"
+                app:useSimpleSummaryProvider="true" />
+
+            <ListPreference
+                android:defaultValue="@string/p_default"
+                android:entries="@array/vibration_profile"
+                android:entryValues="@array/vibration_profile_values"
+                android:icon="@drawable/ic_chair"
+                android:key="huami_vibration_profile_idle_alerts"
+                android:title="@string/pref_screen_notification_idle_alerts"
+                app:useSimpleSummaryProvider="true" />
+
+            <ListPreference
+                android:defaultValue="@string/p_default"
+                android:entries="@array/vibration_profile"
+                android:entryValues="@array/vibration_profile_values"
+                android:icon="@drawable/ic_device_set_reminders"
+                android:key="huami_vibration_profile_event_reminder"
+                android:title="@string/pref_screen_notification_profile_event_reminder"
+                app:useSimpleSummaryProvider="true" />
+
+            <ListPreference
+                android:defaultValue="@string/p_default"
+                android:entries="@array/vibration_profile"
+                android:entryValues="@array/vibration_profile_values"
+                android:icon="@drawable/ic_action_find_lost_device"
+                android:key="huami_vibration_profile_find_band"
+                android:title="@string/pref_screen_notification_profile_find_device"
+                app:useSimpleSummaryProvider="true" />
+
+            <ListPreference
+                android:defaultValue="@string/p_default"
+                android:entries="@array/vibration_profile"
+                android:entryValues="@array/vibration_profile_values"
+                android:icon="@drawable/ic_checklist"
+                android:key="huami_vibration_profile_todo_list"
+                android:title="@string/pref_screen_notification_profile_todo_list"
+                app:useSimpleSummaryProvider="true" />
+
+            <ListPreference
+                android:defaultValue="@string/p_default"
+                android:entries="@array/vibration_profile"
+                android:entryValues="@array/vibration_profile_values"
+                android:icon="@drawable/ic_calendar_to"
+                android:key="huami_vibration_profile_schedule"
+                android:title="@string/pref_screen_notification_profile_schedule"
+                app:useSimpleSummaryProvider="true" />
+        </PreferenceCategory>
+
+        <!-- TODO: Manage vibration patterns -->
+    </PreferenceScreen>
+</androidx.preference.PreferenceScreen>
