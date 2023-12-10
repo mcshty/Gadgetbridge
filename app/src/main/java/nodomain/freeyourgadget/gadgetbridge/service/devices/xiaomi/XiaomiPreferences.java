@@ -32,6 +32,9 @@ public final class XiaomiPreferences {
     public static final String PREF_REMINDER_SLOTS = "reminder_slots";
     public static final String PREF_CANNED_MESSAGES_MIN = "canned_messages_min";
     public static final String PREF_CANNED_MESSAGES_MAX = "canned_messages_max";
+    public static final String PREF_VIBRATION_PATTERN_NOTIFICATION_TYPES = "vibration_pattern_notification_types";
+    public static final String PREF_VIBRATION_PATTERN_IDS = "vibration_pattern_ids";
+    public static final String PREF_VIBRATION_PATTERN_NAMES = "vibration_pattern_names";
 
     private XiaomiPreferences() {
         // util class
