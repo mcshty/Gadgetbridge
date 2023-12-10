@@ -287,20 +287,21 @@ public abstract class XiaomiCoordinator extends AbstractBLEDeviceCoordinator {
 
     @Override
     public int getWorldClocksSlotCount() {
-        // TODO how many? also, map world clocks
-        return 0;
+        return 20;
     }
 
     @Override
     public int getWorldClocksLabelLength() {
-        // TODO no labels
-        // TODO list of supported timezones
-        return 5;
+        return 0;
+    }
+
+    @Override
+    public int getWorldClocksCodeLength() {
+        return 0;
     }
 
     @Override
     public boolean supportsDisabledWorldClocks() {
-        // TODO does it?
         return false;
     }
 
@@ -360,7 +361,7 @@ public abstract class XiaomiCoordinator extends AbstractBLEDeviceCoordinator {
         //
         settings.add(R.xml.devicesettings_header_time);
         settings.add(R.xml.devicesettings_timeformat);
-        if (getWorldClocksSlotCount() > 0) {
+        if (supports(device, FEAT_WORLD_CLOCKS)) {
             settings.add(R.xml.devicesettings_world_clocks);
         }
 

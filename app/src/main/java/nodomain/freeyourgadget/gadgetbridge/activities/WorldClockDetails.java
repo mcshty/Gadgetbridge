@@ -42,7 +42,6 @@ import nodomain.freeyourgadget.gadgetbridge.database.DBHelper;
 import nodomain.freeyourgadget.gadgetbridge.devices.DeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.entities.WorldClock;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
-import nodomain.freeyourgadget.gadgetbridge.util.DeviceHelper;
 import nodomain.freeyourgadget.gadgetbridge.util.GB;
 import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
 
@@ -55,7 +54,9 @@ public class WorldClockDetails extends AbstractGBActivity {
     ArrayAdapter<String> timezoneAdapter;
 
     TextView worldClockTimezone;
+    View worldClockLabelCard;
     EditText worldClockLabel;
+    View worldClockCodeCard;
     EditText worldClockCode;
     View worldClockEnabledCard;
     CheckBox worldClockEnabled;
@@ -76,7 +77,9 @@ public class WorldClockDetails extends AbstractGBActivity {
         worldClockEnabledCard = findViewById(R.id.card_enabled);
         worldClockEnabled = findViewById(R.id.world_clock_enabled);
         worldClockTimezone = findViewById(R.id.world_clock_timezone);
+        worldClockLabelCard = findViewById(R.id.card_label);
         worldClockLabel = findViewById(R.id.world_clock_label);
+        worldClockCodeCard = findViewById(R.id.card_code);
         worldClockCode = findViewById(R.id.world_clock_code);
 
         device = getIntent().getParcelableExtra(GBDevice.EXTRA_DEVICE);
@@ -107,7 +110,13 @@ public class WorldClockDetails extends AbstractGBActivity {
             worldClockEnabledCard.setVisibility(View.GONE);
         }
 
-        worldClockLabel.setFilters(new InputFilter[]{new InputFilter.LengthFilter(coordinator.getWorldClocksLabelLength())});
+        final int labelLength = coordinator.getWorldClocksLabelLength();
+
+        if (labelLength == 0) {
+            worldClockLabelCard.setVisibility(View.GONE);
+        }
+
+        worldClockLabel.setFilters(new InputFilter[]{new InputFilter.LengthFilter(labelLength)});
         worldClockLabel.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(final CharSequence s, int start, int count, int after) {
@@ -123,7 +132,13 @@ public class WorldClockDetails extends AbstractGBActivity {
             }
         });
 
-        worldClockCode.setFilters(new InputFilter[]{new InputFilter.LengthFilter(3)});
+        final int codeLength = coordinator.getWorldClocksCodeLength();
+
+        if (codeLength == 0) {
+            worldClockCodeCard.setVisibility(View.GONE);
+        }
+
+        worldClockCode.setFilters(new InputFilter[]{new InputFilter.LengthFilter(codeLength)});
         worldClockCode.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(final CharSequence s, int start, int count, int after) {
@@ -140,13 +155,10 @@ public class WorldClockDetails extends AbstractGBActivity {
         });
 
         final FloatingActionButton fab = findViewById(R.id.fab_save);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                updateWorldClock();
-                WorldClockDetails.this.setResult(1);
-                finish();
-            }
+        fab.setOnClickListener(view -> {
+            updateWorldClock();
+            WorldClockDetails.this.setResult(1);
+            finish();
         });
 
         updateUiFromWorldClock();

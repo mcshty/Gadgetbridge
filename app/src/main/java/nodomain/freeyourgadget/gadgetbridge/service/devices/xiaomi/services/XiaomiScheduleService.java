@@ -30,6 +30,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -65,6 +66,7 @@ public class XiaomiScheduleService extends AbstractXiaomiService {
     private static final int CMD_SLEEP_MODE_SET = 9;
     private static final int CMD_WORLD_CLOCKS_GET = 10;
     private static final int CMD_WORLD_CLOCKS_SET = 11;
+    private static final int CMD_WORLD_CLOCKS_DEL = 13;
     private static final int CMD_REMINDERS_GET = 14;
     private static final int CMD_REMINDERS_CREATE = 15;
     private static final int CMD_REMINDERS_EDIT = 17;
@@ -122,6 +124,12 @@ public class XiaomiScheduleService extends AbstractXiaomiService {
                 return;
             case CMD_SLEEP_MODE_GET:
                 handleSleepModeConfig(cmd.getSchedule().getSleepMode());
+                return;
+            case CMD_WORLD_CLOCKS_SET:
+                LOG.debug("Got world clocks set ack, status={}", cmd.getStatus());
+                return;
+            case CMD_WORLD_CLOCKS_DEL:
+                LOG.debug("Got world clocks del ack, status={}", cmd.getStatus());
                 return;
             case CMD_REMINDERS_GET:
                 handleReminders(cmd.getSchedule().getReminders());
@@ -397,7 +405,13 @@ public class XiaomiScheduleService extends AbstractXiaomiService {
 
     public void handleWorldClocks(final XiaomiProto.WorldClocks worldClocks) {
         LOG.info("Got {} world clocks: {}", worldClocks.getWorldClockCount(), worldClocks.getWorldClockList());
+
         // TODO map the world clock codes
+
+        final GBDeviceEventUpdatePreferences eventUpdatePreferences = new GBDeviceEventUpdatePreferences()
+                .withPreference(XiaomiPreferences.FEAT_WORLD_CLOCKS, true);
+
+        getSupport().evaluateGBDeviceEvent(eventUpdatePreferences);
     }
 
     public void onSetAlarms(final ArrayList<? extends Alarm> alarms) {

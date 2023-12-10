@@ -448,6 +448,11 @@ public abstract class AbstractDeviceCoordinator implements DeviceCoordinator {
     }
 
     @Override
+    public int getWorldClocksCodeLength() {
+        return 3;
+    }
+
+    @Override
     public boolean supportsDisabledWorldClocks() {
         return false;
     }

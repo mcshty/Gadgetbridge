@@ -45,6 +45,7 @@ public final class XiaomiPreferences {
     public static final String FEAT_VITALITY_SCORE = "feat_vitality_score";
     public static final String FEAT_SCREEN_ON_ON_NOTIFICATIONS = "feat_screen_on_on_notifications";
     public static final String FEAT_CAMERA_REMOTE = "feat_camera_remote";
+    public static final String FEAT_WORLD_CLOCKS = "feat_world_clocks";
 
     private XiaomiPreferences() {
         // util class

@@ -73,7 +73,16 @@ public class ConfigureWorldClocks extends AbstractGBActivity {
 
         gbDevice = getIntent().getParcelableExtra(GBDevice.EXTRA_DEVICE);
 
-        mGBWorldClockListAdapter = new GBWorldClockListAdapter(this);
+        if (gbDevice == null) {
+            LOG.error("gbDevice is null - should never happen");
+            finish();
+            return;
+        }
+
+        mGBWorldClockListAdapter = new GBWorldClockListAdapter(
+                this,
+                gbDevice.getDeviceCoordinator().getWorldClocksLabelLength() > 0
+        );
 
         final RecyclerView worldClocksRecyclerView = findViewById(R.id.world_clock_list);
         worldClocksRecyclerView.setHasFixedSize(true);

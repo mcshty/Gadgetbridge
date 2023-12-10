@@ -462,9 +462,14 @@ public interface DeviceCoordinator {
     int getWorldClocksSlotCount();
 
     /**
-     * Indicates the maximum label length for a world clock in the device.
+     * Indicates the maximum label length for a world clock in the device, 0 if not supported.
      */
     int getWorldClocksLabelLength();
+
+    /**
+     * Indicates the maximum code length for a world clock in the device, 0 if not supported.
+     */
+    int getWorldClocksCodeLength();
 
     /**
      * Indicates whether the device supports disabled world clocks that can be enabled through

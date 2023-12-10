@@ -48,10 +48,13 @@ import nodomain.freeyourgadget.gadgetbridge.entities.WorldClock;
 public class GBWorldClockListAdapter extends RecyclerView.Adapter<GBWorldClockListAdapter.ViewHolder> {
 
     private final Context mContext;
+    private final boolean supportsLabels;
     private ArrayList<WorldClock> worldClockList;
 
-    public GBWorldClockListAdapter(final Context context) {
+    public GBWorldClockListAdapter(final Context context,
+                                   final boolean supportsLabels) {
         this.mContext = context;
+        this.supportsLabels = supportsLabels;
     }
 
     public void setWorldClockList(final List<WorldClock> worldClocks) {
@@ -99,8 +102,14 @@ public class GBWorldClockListAdapter extends RecyclerView.Adapter<GBWorldClockLi
             }
         });
 
-        holder.worldClockLabel.setText(worldClock.getLabel());
-        holder.worldClockTimezone.setText(worldClock.getTimeZoneId());
+        if (supportsLabels) {
+            holder.worldClockLabel.setText(worldClock.getLabel());
+            holder.worldClockTimezone.setText(worldClock.getTimeZoneId());
+        } else {
+            // TODO hide one of them cleanly
+            holder.worldClockLabel.setText(worldClock.getTimeZoneId());
+            holder.worldClockTimezone.setText(worldClock.getTimeZoneId());
+        }
 
         final DateFormat df = new SimpleDateFormat("HH:mm", GBApplication.getLanguage());
         df.setTimeZone(TimeZone.getTimeZone(worldClock.getTimeZoneId()));
