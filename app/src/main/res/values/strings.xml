@@ -2480,4 +2480,8 @@
     <string name="widget_move_down">Move down</string>
     <string name="widget_missing_parts">Please select all widgets</string>
     <string name="widget_unknown_workout">Unknown workout - %s</string>
+    <string name="uploading_watchface">Uploading watchface…</string>
+    <string name="uploadwatchfaceoperation_in_progress">Uploading watchface</string>
+    <string name="uploadwatchfaceoperation_complete">Watchface installation completed</string>
+    <string name="uploadwatchfaceoperation_failed">Watchface installation failed</string>
 </resources>

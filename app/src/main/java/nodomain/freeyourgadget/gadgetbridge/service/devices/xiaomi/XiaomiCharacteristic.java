@@ -45,7 +45,7 @@ public class XiaomiCharacteristic {
     // max chunk size, including headers
     public static final int MAX_WRITE_SIZE = 242;
 
-    private final XiaomiSupport mSupport;
+    private final XiaomiBleSupport mSupport;
 
     private final BluetoothGattCharacteristic bluetoothGattCharacteristic;
     private final UUID characteristicUUID;
@@ -72,7 +72,7 @@ public class XiaomiCharacteristic {
 
     private SendCallback callback;
 
-    public XiaomiCharacteristic(final XiaomiSupport support,
+    public XiaomiCharacteristic(final XiaomiBleSupport support,
                                 final BluetoothGattCharacteristic bluetoothGattCharacteristic,
                                 @Nullable final XiaomiAuthService authService) {
         this.mSupport = support;

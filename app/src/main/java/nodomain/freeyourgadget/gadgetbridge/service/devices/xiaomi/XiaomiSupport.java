@@ -18,12 +18,9 @@ package nodomain.freeyourgadget.gadgetbridge.service.devices.xiaomi;
 
 
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattCharacteristic;
 import android.content.Context;
 import android.location.Location;
 import android.net.Uri;
-import android.widget.Toast;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -51,9 +48,7 @@ import nodomain.freeyourgadget.gadgetbridge.model.Reminder;
 import nodomain.freeyourgadget.gadgetbridge.model.WeatherSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.WorldClock;
 import nodomain.freeyourgadget.gadgetbridge.proto.xiaomi.XiaomiProto;
-import nodomain.freeyourgadget.gadgetbridge.service.btle.AbstractBTLEDeviceSupport;
-import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
-import nodomain.freeyourgadget.gadgetbridge.service.btle.actions.SetDeviceStateAction;
+import nodomain.freeyourgadget.gadgetbridge.service.AbstractDeviceSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.xiaomi.services.AbstractXiaomiService;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.xiaomi.services.XiaomiCalendarService;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.xiaomi.services.XiaomiDataUploadService;
@@ -68,27 +63,23 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.xiaomi.services.Xiao
 import nodomain.freeyourgadget.gadgetbridge.util.GB;
 import nodomain.freeyourgadget.gadgetbridge.util.Prefs;
 
-public class XiaomiSupport extends AbstractBTLEDeviceSupport {
+public class XiaomiSupport extends AbstractDeviceSupport {
     private static final Logger LOG = LoggerFactory.getLogger(XiaomiSupport.class);
 
-    protected XiaomiCharacteristic characteristicCommandRead;
-    protected XiaomiCharacteristic characteristicCommandWrite;
-    protected XiaomiCharacteristic characteristicActivityData;
-    protected XiaomiCharacteristic characteristicDataUpload;
+    private final XiaomiAuthService authService = new XiaomiAuthService(this);
+    private final XiaomiMusicService musicService = new XiaomiMusicService(this);
+    private final XiaomiHealthService healthService = new XiaomiHealthService(this);
+    private final XiaomiNotificationService notificationService = new XiaomiNotificationService(this);
+    private final XiaomiScheduleService scheduleService = new XiaomiScheduleService(this);
+    private final XiaomiWeatherService weatherService = new XiaomiWeatherService(this);
+    private final XiaomiSystemService systemService = new XiaomiSystemService(this);
+    private final XiaomiCalendarService calendarService = new XiaomiCalendarService(this);
+    private final XiaomiWatchfaceService watchfaceService = new XiaomiWatchfaceService(this);
+    private final XiaomiDataUploadService dataUploadService = new XiaomiDataUploadService(this);
+    private final XiaomiPhonebookService phonebookService = new XiaomiPhonebookService(this);
 
-    protected final XiaomiAuthService authService = new XiaomiAuthService(this);
-    protected final XiaomiMusicService musicService = new XiaomiMusicService(this);
-    protected final XiaomiHealthService healthService = new XiaomiHealthService(this);
-    protected final XiaomiNotificationService notificationService = new XiaomiNotificationService(this);
-    protected final XiaomiScheduleService scheduleService = new XiaomiScheduleService(this);
-    protected final XiaomiWeatherService weatherService = new XiaomiWeatherService(this);
-    protected final XiaomiSystemService systemService = new XiaomiSystemService(this);
-    protected final XiaomiCalendarService calendarService = new XiaomiCalendarService(this);
-    protected final XiaomiWatchfaceService watchfaceService = new XiaomiWatchfaceService(this);
-    protected final XiaomiDataUploadService dataUploadService = new XiaomiDataUploadService(this);
-    protected final XiaomiPhonebookService phonebookService = new XiaomiPhonebookService(this);
-
-    private String mFirmwareVersion = null;
+    private String cachedFirmwareVersion = null;
+    private XiaomiSupport connectionSupport = null;
 
     private final Map<Integer, AbstractXiaomiService> mServiceMap = new LinkedHashMap<Integer, AbstractXiaomiService>() {{
         put(XiaomiAuthService.COMMAND_TYPE, authService);
@@ -104,98 +95,6 @@ public class XiaomiSupport extends AbstractBTLEDeviceSupport {
         put(XiaomiPhonebookService.COMMAND_TYPE, phonebookService);
     }};
 
-    public XiaomiSupport() {
-        super(LOG);
-        for (final UUID uuid : XiaomiBleUuids.UUIDS.keySet()) {
-            addSupportedService(uuid);
-        }
-    }
-
-    @Override
-    protected final TransactionBuilder initializeDevice(final TransactionBuilder builder) {
-        XiaomiBleUuids.XiaomiBleUuidSet uuidSet = null;
-        BluetoothGattCharacteristic btCharacteristicCommandRead = null;
-        BluetoothGattCharacteristic btCharacteristicCommandWrite = null;
-        BluetoothGattCharacteristic btCharacteristicActivityData = null;
-        BluetoothGattCharacteristic btCharacteristicDataUpload = null;
-
-        // Attempt to find a known xiaomi service
-        for (Map.Entry<UUID, XiaomiBleUuids.XiaomiBleUuidSet> xiaomiUuid : XiaomiBleUuids.UUIDS.entrySet()) {
-            if (getSupportedServices().contains(xiaomiUuid.getKey())) {
-                LOG.debug("Found Xiaomi service: {}", xiaomiUuid.getKey());
-                uuidSet = xiaomiUuid.getValue();
-
-                btCharacteristicCommandRead = getCharacteristic(uuidSet.getCharacteristicCommandRead());
-                btCharacteristicCommandWrite = getCharacteristic(uuidSet.getCharacteristicCommandWrite());
-                btCharacteristicActivityData = getCharacteristic(uuidSet.getCharacteristicActivityData());
-                btCharacteristicDataUpload = getCharacteristic(uuidSet.getCharacteristicDataUpload());
-                if (btCharacteristicCommandRead == null) {
-                    LOG.warn("btCharacteristicCommandRead characteristicc is null");
-                    continue;
-                } else if (btCharacteristicCommandWrite == null) {
-                    LOG.warn("btCharacteristicCommandWrite characteristicc is null");
-                    continue;
-                } else if (btCharacteristicActivityData == null) {
-                    LOG.warn("btCharacteristicActivityData characteristicc is null");
-                    continue;
-                } else if (btCharacteristicDataUpload == null) {
-                    LOG.warn("btCharacteristicDataUpload characteristicc is null");
-                    continue;
-                }
-
-                break;
-            }
-        }
-
-        if (uuidSet == null) {
-            GB.toast(getContext(), "Failed to find known Xiaomi service", Toast.LENGTH_LONG, GB.ERROR);
-            LOG.warn("Failed to find known Xiaomi service");
-            builder.add(new SetDeviceStateAction(getDevice(), GBDevice.State.NOT_CONNECTED, getContext()));
-            return builder;
-        }
-
-        // FIXME unsetDynamicState unsets the fw version, which causes problems..
-        if (getDevice().getFirmwareVersion() == null && mFirmwareVersion != null) {
-            getDevice().setFirmwareVersion(mFirmwareVersion);
-        }
-
-        if (btCharacteristicCommandRead == null || btCharacteristicCommandWrite == null) {
-            LOG.warn("Characteristics are null, will attempt to reconnect");
-            builder.add(new SetDeviceStateAction(getDevice(), GBDevice.State.WAITING_FOR_RECONNECT, getContext()));
-            return builder;
-        }
-
-        this.characteristicCommandRead = new XiaomiCharacteristic(this, btCharacteristicCommandRead, authService);
-        this.characteristicCommandRead.setEncrypted(uuidSet.isEncrypted());
-        this.characteristicCommandRead.setHandler(this::handleCommandBytes);
-        this.characteristicCommandWrite = new XiaomiCharacteristic(this, btCharacteristicCommandWrite, authService);
-        this.characteristicCommandWrite.setEncrypted(uuidSet.isEncrypted());
-        this.characteristicActivityData = new XiaomiCharacteristic(this, btCharacteristicActivityData, authService);
-        this.characteristicActivityData.setHandler(healthService.getActivityFetcher()::addChunk);
-        this.characteristicActivityData.setEncrypted(uuidSet.isEncrypted());
-        this.characteristicDataUpload = new XiaomiCharacteristic(this, btCharacteristicDataUpload, authService);
-        this.characteristicDataUpload.setEncrypted(uuidSet.isEncrypted());
-        this.characteristicDataUpload.setIncrementNonce(false);
-        this.dataUploadService.setDataUploadCharacteristic(this.characteristicDataUpload);
-
-        builder.requestMtu(247);
-
-        builder.add(new SetDeviceStateAction(getDevice(), GBDevice.State.INITIALIZING, getContext()));
-
-        builder.notify(btCharacteristicCommandWrite, true);
-        builder.notify(btCharacteristicCommandRead, true);
-        builder.notify(btCharacteristicActivityData, true);
-        builder.notify(btCharacteristicDataUpload, true);
-
-        if (uuidSet.isEncrypted()) {
-            authService.startEncryptedHandshake(builder);
-        } else {
-            authService.startClearTextHandshake(builder);
-        }
-
-        return builder;
-    }
-
     @Override
     public boolean useAutoConnect() {
         return true;
@@ -206,44 +105,122 @@ public class XiaomiSupport extends AbstractBTLEDeviceSupport {
         return false;
     }
 
-    @Override
-    public void setContext(final GBDevice gbDevice, final BluetoothAdapter btAdapter, final Context context) {
-        // FIXME unsetDynamicState unsets the fw version, which causes problems..
-        if (mFirmwareVersion == null && gbDevice.getFirmwareVersion() != null) {
-            mFirmwareVersion = gbDevice.getFirmwareVersion();
+    protected void setConnectionSpecificSupport(XiaomiSupport innerSupport) {
+        this.connectionSupport = innerSupport;
+    }
+
+    private XiaomiSupport createConnectionSpecificSupport() {
+        switch (getDevice().getDeviceCoordinator().getConnectionType()) {
+            case BLE: // device coordinator inherits from AbstractBtLEDeviceSupport
+                return new XiaomiBleSupport();
+            case BL_CLASSIC:
+                // FIXME implement XiaomiSppSupport
+                return null;
         }
 
-        super.setContext(gbDevice, btAdapter, context);
-        for (final AbstractXiaomiService service : mServiceMap.values()) {
-            service.setContext(context);
+        // case BOTH:
+        // FIXME allow force and fallback switching to SppSupport once implemented
+        return new XiaomiBleSupport();
+    }
+
+    public XiaomiSupport getConnectionSpecificSupport() {
+        if (connectionSupport == null) {
+            connectionSupport = createConnectionSpecificSupport();
         }
+
+        return connectionSupport;
     }
 
     @Override
-    public boolean onCharacteristicChanged(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
-        if (super.onCharacteristicChanged(gatt, characteristic)) {
-            return true;
+    public boolean connect() {
+        if (didCallSelf()) {
+            return false;
         }
 
-        final UUID characteristicUUID = characteristic.getUuid();
-        final byte[] value = characteristic.getValue();
+        if (getConnectionSpecificSupport() != null)
+            return getConnectionSpecificSupport().connect();
 
-        if (characteristicCommandRead.getCharacteristicUUID().equals(characteristicUUID)) {
-            characteristicCommandRead.onCharacteristicChanged(value);
-            return true;
-        } else if (characteristicCommandWrite.getCharacteristicUUID().equals(characteristicUUID)) {
-            characteristicCommandWrite.onCharacteristicChanged(value);
-            return true;
-        } else if (characteristicActivityData.getCharacteristicUUID().equals(characteristicUUID)) {
-            characteristicActivityData.onCharacteristicChanged(value);
-            return true;
-        } else if (characteristicDataUpload.getCharacteristicUUID().equals(characteristicUUID)) {
-            characteristicDataUpload.onCharacteristicChanged(value);
-            return true;
-        }
-
-        LOG.warn("Unhandled characteristic changed: {} {}", characteristicUUID, GB.hexdump(value));
+        LOG.error("getConnectionSpecificSupport returned null, could not connect");
         return false;
+    }
+
+    public void onUploadProgress(int textRsrc, int progressPercent) {
+        if (didCallSelf()) {
+            return;
+        }
+
+        if (getConnectionSpecificSupport() == null) {
+            LOG.error("onUploadProgress called but connection specific unavailable");
+            return;
+        }
+
+        getConnectionSpecificSupport().onUploadProgress(textRsrc, progressPercent);
+    }
+
+    @Override
+    public void dispose() {
+        if (didCallSelf()) {
+            return;
+        }
+
+        if (getConnectionSpecificSupport() != null) {
+            getConnectionSpecificSupport().dispose();
+            connectionSupport = null;
+        }
+    }
+
+    public void setContext(final GBDevice device, final BluetoothAdapter adapter, final Context context) {
+        if (didCallSelf()) {
+            return;
+        }
+
+        // FIXME unsetDynamicState unsets the fw version, which causes problems..
+        if (getCachedFirmwareVersion() == null && device.getFirmwareVersion() != null) {
+            setCachedFirmwareVersion(device.getFirmwareVersion());
+        }
+
+        super.setContext(device, adapter, context);
+
+        for (AbstractXiaomiService service : mServiceMap.values()) {
+            service.setContext(context);
+        }
+
+        if (getConnectionSpecificSupport() != null && this != getConnectionSpecificSupport()) {
+            getConnectionSpecificSupport().setContext(device, adapter, context);
+        }
+    }
+
+    public boolean didCallSelf() {
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+
+        if (stackTrace[3].getClassName().equals(stackTrace[4].getClassName())) {
+            if (connectionSupport != null) {
+                LOG.warn("Detected recursive self-call; did connection specific support class {} implement {}?",
+                        connectionSupport.getClass().getSimpleName(),
+                        stackTrace[3].getMethodName());
+            }
+
+            return true;
+        }
+        return stackTrace[3].getClassName().equals(stackTrace[4].getClassName());
+    }
+
+    public String getCachedFirmwareVersion() {
+        return this.cachedFirmwareVersion;
+    }
+
+    public void setCachedFirmwareVersion(String version) {
+        this.cachedFirmwareVersion = version;
+    }
+
+    public void disconnect() {
+        if (didCallSelf()) {
+            return;
+        }
+
+        if (getConnectionSpecificSupport() != null) {
+            getConnectionSpecificSupport().disconnect();
+        }
     }
 
     public void handleCommandBytes(final byte[] plainValue) {
@@ -449,13 +426,8 @@ public class XiaomiSupport extends AbstractBTLEDeviceSupport {
         return (XiaomiCoordinator) gbDevice.getDeviceCoordinator();
     }
 
-    protected void phase2Initialize() {
-        LOG.info("phase2Initialize");
-
-        characteristicCommandRead.reset();
-        characteristicCommandWrite.reset();
-        characteristicActivityData.reset();
-        characteristicDataUpload.reset();
+    protected void onAuthSuccess() {
+        LOG.info("onAuthSuccess");
 
         if (GBApplication.getPrefs().getBoolean("datetime_synconconnect", true)) {
             systemService.setCurrentTime();
@@ -467,28 +439,11 @@ public class XiaomiSupport extends AbstractBTLEDeviceSupport {
     }
 
     public void sendCommand(final String taskName, final XiaomiProto.Command command) {
-        if (this.characteristicCommandWrite == null) {
-            // Can sometimes happen in race conditions when connecting + receiving calendar event or weather updates
-            LOG.warn("characteristicCommandWrite is null!");
+        if (didCallSelf()) {
             return;
         }
 
-        this.characteristicCommandWrite.write(taskName, command.toByteArray());
-    }
-
-    /**
-     * Realistically, this function should only be used during auth, as we must schedule the command after
-     * notifications were enabled on the characteristics, and for that we need the builder to guarantee the
-     * order.
-     */
-    public void sendCommand(final TransactionBuilder builder, final XiaomiProto.Command command) {
-        if (this.characteristicCommandWrite == null) {
-            // Can sometimes happen in race conditions when connecting + receiving calendar event or weather updates
-            LOG.warn("characteristicCommandWrite is null!");
-            return;
-        }
-
-        this.characteristicCommandWrite.write(builder, command.toByteArray());
+        getConnectionSpecificSupport().sendCommand(taskName, command);
     }
 
     public void sendCommand(final String taskName, final int type, final int subtype) {
@@ -501,8 +456,16 @@ public class XiaomiSupport extends AbstractBTLEDeviceSupport {
         );
     }
 
-    public XiaomiDataUploadService getDataUploader() {
+    public XiaomiAuthService getAuthService() {
+        return this.authService;
+    }
+
+    public XiaomiDataUploadService getDataUploadService() {
         return this.dataUploadService;
+    }
+
+    public XiaomiHealthService getHealthService() {
+        return this.healthService;
     }
 
     @Override
