@@ -50,6 +50,11 @@ public class XiaomiWatchS1ActiveCoordinator extends XiaomiCoordinator {
         return ConnectionType.BOTH;
     }
 
+    @Override
+    public boolean supportsFindDevice() {
+        return false;
+    }
+
     @Nullable
     @Override
     public InstallHandler findInstallHandler(Uri uri, Context context) {

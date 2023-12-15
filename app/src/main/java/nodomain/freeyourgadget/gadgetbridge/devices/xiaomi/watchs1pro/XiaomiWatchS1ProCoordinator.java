@@ -19,6 +19,11 @@ public class XiaomiWatchS1ProCoordinator extends XiaomiCoordinator {
     }
 
     @Override
+    public boolean supportsFindDevice() {
+        return false;
+    }
+
+    @Override
     public int getDeviceNameResource() {
         return R.string.devicetype_xiaomi_watch_s1_pro;
     }
