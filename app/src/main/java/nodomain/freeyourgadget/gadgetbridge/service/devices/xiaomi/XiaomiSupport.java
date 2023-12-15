@@ -113,9 +113,8 @@ public class XiaomiSupport extends AbstractDeviceSupport {
         switch (getDevice().getDeviceCoordinator().getConnectionType()) {
             case BLE: // device coordinator inherits from AbstractBtLEDeviceSupport
                 return new XiaomiBleSupport();
-            case BL_CLASSIC:
-                // FIXME implement XiaomiSppSupport
-                return null;
+            case BT_CLASSIC:
+                return new XiaomiSppSupport();
         }
 
         // case BOTH:

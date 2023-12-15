@@ -38,6 +38,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
+import nodomain.freeyourgadget.gadgetbridge.util.GB;
 import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
 
 public final class BtBRQueue {
@@ -127,7 +128,7 @@ public final class BtBRQueue {
                     }
                     byte[] data = new byte[mBufferSize];
                     int len = mBtSocket.getInputStream().read(data);
-                    LOG.debug("Received data: " + StringUtils.bytesToHex(data));
+                    LOG.debug("Received data: {}", GB.hexdump(data, 0, len));
                     mCallback.onSocketRead(Arrays.copyOf(data, len));
                 }  catch (InterruptedException ignored) {
                     mConnectionLatch = null;
@@ -203,6 +204,7 @@ public final class BtBRQueue {
     public void disconnect() {
         if (mBtSocket != null) {
             try {
+                // TODO this will make us crash if the device is disconnected from the control center
                 mAvailableData = new CountDownLatch(1);
                 mAvailableData.await();
                 mAvailableData = null;

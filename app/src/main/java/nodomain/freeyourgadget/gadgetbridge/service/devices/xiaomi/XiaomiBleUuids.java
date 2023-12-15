@@ -16,11 +16,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.service.devices.xiaomi;
 
+import static nodomain.freeyourgadget.gadgetbridge.service.btle.AbstractBTLEDeviceSupport.BASE_UUID;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
 public class XiaomiBleUuids {
+    public static final UUID UUID_SERVICE_SERIAL_PORT_PROFILE = UUID.fromString(String.format(BASE_UUID, "1101"));
     public static final Map<UUID, XiaomiBleUuidSet> UUIDS = new LinkedHashMap<UUID, XiaomiBleUuidSet>() {{
         // all encrypted devices seem to share the same characteristics
         // Mi Band 8
