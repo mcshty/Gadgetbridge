@@ -21,25 +21,20 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
-import android.os.ParcelUuid;
-
-import androidx.annotation.Nullable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.util.GB;
-import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
 
 public final class BtBRQueue {
     private static final Logger LOG = LoggerFactory.getLogger(BtBRQueue.class);
@@ -206,12 +201,10 @@ public final class BtBRQueue {
             try {
                 // TODO this will make us crash if the device is disconnected from the control center
                 mAvailableData = new CountDownLatch(1);
-                mAvailableData.await();
+                boolean unused = mAvailableData.await(200, TimeUnit.MILLISECONDS);
                 mAvailableData = null;
                 mBtSocket.close();
-            } catch (IOException e) {
-                LOG.error(e.getMessage());
-            } catch (InterruptedException e) {
+            } catch (IOException | InterruptedException e) {
                 LOG.error(e.getMessage());
             }
         }
