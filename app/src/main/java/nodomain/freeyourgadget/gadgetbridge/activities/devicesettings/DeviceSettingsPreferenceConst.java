@@ -396,4 +396,5 @@ public class DeviceSettingsPreferenceConst {
     public static final String PREF_DEVICE_ACTION_WOKE_UP_BROADCAST = "prefs_events_forwarding_wokeup_broadcast";
     public static final String PREF_DEVICE_ACTION_START_NON_WEAR_SELECTIONS = "events_forwarding_startnonwear_action_selections";
     public static final String PREF_DEVICE_ACTION_START_NON_WEAR_BROADCAST = "prefs_events_forwarding_startnonwear_broadcast";
+    public static final String PREF_FORCE_CONNECTION_TYPE = "pref_force_connection_type";
 }

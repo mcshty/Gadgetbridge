@@ -17,6 +17,8 @@
 package nodomain.freeyourgadget.gadgetbridge.service.devices.xiaomi;
 
 
+import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_FORCE_CONNECTION_TYPE;
+
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.location.Location;
@@ -33,6 +35,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
+import nodomain.freeyourgadget.gadgetbridge.R;
+import nodomain.freeyourgadget.gadgetbridge.devices.DeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.xiaomi.XiaomiCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.xiaomi.XiaomiFWHelper;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
@@ -109,17 +113,36 @@ public class XiaomiSupport extends AbstractDeviceSupport {
         this.connectionSupport = innerSupport;
     }
 
+    private DeviceCoordinator.ConnectionType getForcedConnectionTypeFromPrefs() {
+        final String connTypeAuto = getContext().getString(R.string.pref_force_connection_type_auto_value);
+        String connTypePref = getDevicePrefs().getString(PREF_FORCE_CONNECTION_TYPE, connTypeAuto);
+
+        if (getContext().getString(R.string.pref_force_connection_type_ble_value).equals(connTypePref))
+            return DeviceCoordinator.ConnectionType.BLE;
+
+        if (getContext().getString(R.string.pref_force_connection_type_bt_classic_value).equals(connTypePref))
+            return DeviceCoordinator.ConnectionType.BT_CLASSIC;
+
+        // either set to default, unknown option selected, or has not been set
+        return DeviceCoordinator.ConnectionType.BOTH;
+    }
+
     private XiaomiSupport createConnectionSpecificSupport() {
-        switch (getDevice().getDeviceCoordinator().getConnectionType()) {
-            case BLE: // device coordinator inherits from AbstractBtLEDeviceSupport
-                return new XiaomiBleSupport();
-            case BT_CLASSIC:
-                return new XiaomiSppSupport();
+        DeviceCoordinator.ConnectionType connType = getCoordinator().getConnectionType();
+
+        if (connType == DeviceCoordinator.ConnectionType.BOTH) {
+            connType = getForcedConnectionTypeFromPrefs();
         }
 
-        // case BOTH:
-        // FIXME allow force and fallback switching to SppSupport once implemented
-        return new XiaomiBleSupport();
+        switch (connType) {
+            case BT_CLASSIC:
+                return new XiaomiSppSupport();
+            default:
+                LOG.error("Unknown connection type {}, defaulting to BLE device support", connType);
+            case BLE: // device coordinator inherits from AbstractBtLEDeviceSupport
+            case BOTH:
+                return new XiaomiBleSupport();
+        }
     }
 
     public XiaomiSupport getConnectionSpecificSupport() {
