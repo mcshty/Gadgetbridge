@@ -1314,9 +1314,9 @@
     <string name="kind_resources">Resources</string>
     <string name="kind_watchface">Watchface</string>
     <string name="kind_app">App</string>
+    <string name="add_test_device">Add test device</string>
     <string name="devicetype_unknown">Unknown Device</string>
     <string name="devicetype_test">Test Device</string>
-    <string name="add_test_device">Add test device</string>
     <string name="devicetype_pebble">Pebble</string>
     <string name="devicetype_miband">Mi Band</string>
     <string name="devicetype_miband2">Mi Band 2</string>
@@ -1421,6 +1421,31 @@
     <string name="devicetype_xiaomi_watch_lite">Xiaomi Watch Lite</string>
     <string name="devicetype_redmiwatch3active">Redmi Watch 3 Active</string>
     <string name="devicetype_redmi_smart_band_2">Redmi Smart Band 2</string>
+    <string name="devicetype_amazfit_gts">Amazfit GTS</string>
+    <string name="devicetype_amazfit_vergel">Amazfit Verge Lite</string>
+    <string name="devicetype_sg2">Lemfo SG2</string>
+    <string name="devicetype_lefun">Lefun</string>
+    <string name="devicetype_bohemic_smart_bracelet">Bohemic Smart Bracelet</string>
+    <string name="devicetype_xiaomi_watch_s1_active">Xiaomi Watch S1 Active</string>
+    <string name="devicetype_xiaomi_watch_s1_pro">Xiaomi Watch S1 Pro</string>
+    <string name="devicetype_mi_watch_color_sport">Mi Watch Color Sport</string>
+    <string name="devicetype_pixoo">Pixoo</string>
+    <string name="devicetype_nut_mini">Nut mini</string>
+    <string name="devicetype_amazfit_trex_pro">Amazfit T-Rex Pro</string>
+    <string name="devicetype_nothingear1">Nothing Ear (1)</string>
+    <string name="devicetype_galaxybuds">Galaxy Buds</string>
+    <string name="devicetype_galaxybuds_live">Galaxy Buds Live</string>
+    <string name="devicetype_galaxybuds_pro">Galaxy Buds Pro</string>
+    <string name="devicetype_galaxybuds_2">Galaxy Buds2</string>
+    <string name="devicetype_galaxybuds_2_pro">Galaxy Buds2 Pro</string>
+    <string name="devicetype_vesc">VESC</string>
+    <string name="devicetype_bose_qc35">Bose QC35</string>
+    <string name="devicetype_sony_wena3">Sony Wena 3</string>
+    <string name="devicetype_flipper_zero">Flipper zero</string>
+    <string name="devicetype_super_cars">Shell Racing</string>
+    <string name="devicetype_asteroidos">AsteroidOS</string>
+    <string name="devicetype_soflow_s06">SoFlow SO6</string>
+    <string name="devicetype_miband2_hrx">Mi Band HRX</string>
     <string name="choose_auto_export_location">Choose export location</string>
     <string name="notification_channel_name">General</string>
     <string name="notification_channel_high_priority_name">High-priority</string>
@@ -1429,11 +1454,6 @@
     <string name="notification_channel_gps">GPS tracking</string>
     <string name="notification_gps_title">Gadgetbridge GPS</string>
     <string name="notification_gps_text">Sending GPS location to %1$d devices</string>
-    <string name="devicetype_amazfit_gts">Amazfit GTS</string>
-    <string name="devicetype_amazfit_vergel">Amazfit Verge Lite</string>
-    <string name="devicetype_sg2">Lemfo SG2</string>
-    <string name="devicetype_lefun">Lefun</string>
-    <string name="devicetype_bohemic_smart_bracelet">Bohemic Smart Bracelet</string>
     <!-- Menus on the smart device -->
     <string name="menuitem_nothing">Nothing</string>
     <string name="menuitem_status">Status</string>
@@ -1830,7 +1850,6 @@
     <string name="freestyle">Freestyle</string>
     <string name="backstroke">Backstroke</string>
     <string name="medley">Medley</string>
-    <string name="devicetype_nut_mini">Nut mini</string>
     <string name="qhybrid_calibration_align_hint">Use the buttons below to align the watch hands to 12:00.</string>
     <string name="lorem_ipsum" translatable="false">Lorem Ipsum</string>
     <plurals name="widget_alarm_target_hours">
@@ -1879,7 +1898,6 @@
     <string name="pref_summary_developer_settings">Settings and functionality used by developers</string>
     <string name="qhybrid_pref_title_external_intents">Allow dangerous external intents</string>
     <string name="qhybrid_pref_summary_external_intents">Allows other Android apps to upload/overwrite files</string>
-    <string name="devicetype_amazfit_trex_pro">Amazfit T-Rex Pro</string>
     <string name="button_watchface_edit_name">Edit name</string>
     <string name="button_watchface_select_image">Change background image</string>
     <string name="button_watchface_add_widget">Add widget</string>
@@ -1951,12 +1969,6 @@
     <string name="prefs_autoheartrate_measurement">Automatic Heart Rate measurements</string>
     <string name="prefs_autoheartrate_sleep">Take measurements during sleep</string>
     <string name="prefs_autoheartrate_interval">Frequency of measurements</string>
-    <string name="devicetype_nothingear1">Nothing Ear (1)</string>
-    <string name="devicetype_galaxybuds">Galaxy Buds</string>
-    <string name="devicetype_galaxybuds_live">Galaxy Buds Live</string>
-    <string name="devicetype_galaxybuds_pro">Galaxy Buds Pro</string>
-    <string name="devicetype_galaxybuds_2">Galaxy Buds2</string>
-    <string name="devicetype_galaxybuds_2_pro">Galaxy Buds2 Pro</string>
     <string name="nothing_prefs_inear_summary">Play/pause the music depending if you wear the earbuds</string>
     <string name="nothing_prefs_inear_title">In-Ear detection</string>
     <string name="prefs_in_ear_detection_summary">Play calls through your earbuds when they are in your ears</string>
@@ -2159,9 +2171,6 @@
     <string name="watchface_dialog_widget_timeout_show_circle">Show circle on timeout</string>
     <string name="qhybrid_title_on_device_confirmation">Enable on-device pairing confirmation</string>
     <string name="qhybrid_summary_on_device_confirmation">On-device pairing confirmations can get annoying. Disabling them might lose you functionality.</string>
-    <string name="devicetype_vesc">VESC</string>
-    <string name="devicetype_bose_qc35">Bose QC35</string>
-    <string name="devicetype_sony_wena3">Sony Wena 3</string>
     <string name="withings_steel_hr">Withings Steel HR</string>
     <string name="pref_button_action_disabled">Disabled</string>
     <string name="pref_media_play">Media Play</string>
@@ -2239,7 +2248,6 @@
     <string name="step_streaks_achievements_sharing_title">Steps Achievements</string>
     <string name="prefs_hourly_chime">Hourly chime</string>
     <string name="prefs_hourly_chime_summary">The watch will beep once an hour</string>
-    <string name="devicetype_flipper_zero">Flipper zero</string>
     <string name="activity_prefs_allow_bluetooth_intent_api">Bluetooth Intent API</string>
     <string name="activity_prefs_summary_allow_bluetooth_intent_api">Allow controlling Bluetooth connection via Intent API</string>
     <string name="intent_api_allow_activity_sync_title">Allow activity sync trigger</string>
@@ -2250,12 +2258,9 @@
     <string name="intent_api_broadcast_export_summary">Broadcast an intent when database export finishes</string>
     <string name="intent_api_allow_debug_commands_title">Allow Debug Commands</string>
     <string name="intent_api_allow_debug_commands_summary">Allow triggering debug menu commands via Intent API</string>
-    <string name="devicetype_super_cars">Shell Racing</string>
     <string name="supercars_turbo_speed_label">Turbo Speed</string>
     <string name="supercars_lights_label">Lights</string>
     <string name="supercars_lights_blinking_label">Blinking</string>
-    <string name="devicetype_asteroidos">AsteroidOS</string>
-    <string name="devicetype_soflow_s06">SoFlow SO6</string>
     <string name="pref_title_lock_unlock">Lock</string>
     <string name="wifi_hotspot">Wi-Fi Hotspot</string>
     <string name="wifi_hotspot_summary">Control the Wi-Fi hotspot on the watch</string>
@@ -2341,7 +2346,6 @@
     <string name="error_menu_companion_not_installed">\'HR Menu Companion\' probably not installed</string>
     <string name="info_menu_structure_contents">Menu structure: %s</string>
     <string name="info_fossil_rebuild_watchface_custom_menu">Please rebuild your watchface for custom menu</string>
-    <string name="devicetype_miband2_hrx">Mi Band HRX</string>
 
     <string name="prefs_home_icon_left_item">Left</string>
     <string name="prefs_home_icon_center_item">Center</string>
@@ -2453,9 +2457,6 @@
     <string name="wake_up_time">Wake Up</string>
     <string name="pref_sleep_mode_schedule_title">Sleep Mode Schedule</string>
     <string name="pref_sleep_mode_schedule_summary">Send a reminder and enter sleep mode at bedtime. At the scheduled wake-up time, the wake-up alarm will sound.</string>
-    <string name="devicetype_xiaomi_watch_s1_active">Xiaomi Watch S1 Active</string>
-    <string name="devicetype_mi_watch_color_sport">Mi Watch Color Sport</string>
-    <string name="devicetype_pixoo">Pixoo</string>
     <string name="not_set">Not set</string>
     <string name="pref_vitality_score_title">Vitality Score</string>
     <string name="pref_vitality_score_7_day_title">7-day progress</string>
