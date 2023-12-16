@@ -23,15 +23,14 @@ import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.proto.xiaomi.XiaomiProto;
 import nodomain.freeyourgadget.gadgetbridge.service.btbr.AbstractBTBRDeviceSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.btbr.TransactionBuilder;
-import nodomain.freeyourgadget.gadgetbridge.service.btle.actions.SetDeviceStateAction;
 
-public class XiaomiSppSupport extends XiaomiSupport {
+public class XiaomiSppSupport extends XiaomiConnectionSupport {
     private static final Logger LOG = LoggerFactory.getLogger(XiaomiSppSupport.class);
 
     AbstractBTBRDeviceSupport commsSupport = new AbstractBTBRDeviceSupport(LOG) {
         @Override
         public boolean useAutoConnect() {
-            return XiaomiSppSupport.this.useAutoConnect();
+            return mXiaomiSupport.useAutoConnect();
         }
 
         @Override
@@ -41,18 +40,18 @@ public class XiaomiSppSupport extends XiaomiSupport {
 
         @Override
         public boolean getAutoReconnect() {
-            return XiaomiSppSupport.this.getAutoReconnect();
+            return mXiaomiSupport.getAutoReconnect();
         }
 
         @Override
         protected TransactionBuilder initializeDevice(TransactionBuilder builder) {
             // FIXME unsetDynamicState unsets the fw version, which causes problems..
-            if (getDevice().getFirmwareVersion() == null && XiaomiSppSupport.this.getCachedFirmwareVersion() != null) {
-                getDevice().setFirmwareVersion(XiaomiSppSupport.this.getCachedFirmwareVersion());
+            if (getDevice().getFirmwareVersion() == null && mXiaomiSupport.getCachedFirmwareVersion() != null) {
+                getDevice().setFirmwareVersion(mXiaomiSupport.getCachedFirmwareVersion());
             }
 
             builder.add(new nodomain.freeyourgadget.gadgetbridge.service.btbr.actions.SetDeviceStateAction(getDevice(), GBDevice.State.INITIALIZING, getContext()));
-            XiaomiSppSupport.this.getAuthService().startEncryptedHandshake(XiaomiSppSupport.this, builder);
+            mXiaomiSupport.getAuthService().startEncryptedHandshake(XiaomiSppSupport.this, builder);
 
             return builder;
         }
@@ -67,8 +66,10 @@ public class XiaomiSppSupport extends XiaomiSupport {
     private final AtomicInteger frameCounter = new AtomicInteger(0);
     private final AtomicInteger encryptionCounter = new AtomicInteger(0);
 
-    public XiaomiSppSupport() {
-        super.setConnectionSpecificSupport(this);
+    private final XiaomiSupport mXiaomiSupport;
+
+    public XiaomiSppSupport(final XiaomiSupport xiaomiSupport) {
+        this.mXiaomiSupport = xiaomiSupport;
     }
 
     @Override
@@ -77,9 +78,18 @@ public class XiaomiSppSupport extends XiaomiSupport {
     }
 
     @Override
+    public void onUploadProgress(final int textRsrc, final int progressPercent) {
+        // TODO
+    }
+
+    @Override
     public void setContext(GBDevice device, BluetoothAdapter adapter, Context context) {
-        super.setContext(device, adapter, context);
         this.commsSupport.setContext(device, adapter, context);
+    }
+
+    @Override
+    public void disconnect() {
+
     }
 
     private int findNextPossiblePreamble(final byte[] haystack) {
@@ -179,21 +189,21 @@ public class XiaomiSppSupport extends XiaomiSupport {
         byte[] payload = packet.getPayload();
 
         if (packet.getDataType() == 1) {
-            payload = getAuthService().decrypt(payload);
+            payload = mXiaomiSupport.getAuthService().decrypt(payload);
         }
 
         if (packet.getChannel() == CHANNEL_PROTO_RX || packet.getChannel() == CHANNEL_PROTO_TX) {
-            handleCommandBytes(payload);
+            mXiaomiSupport.handleCommandBytes(payload);
         }
 
         if (packet.getChannel() == CHANNEL_FITNESS) {
-            getHealthService().getActivityFetcher().addChunk(payload);
+            mXiaomiSupport.getHealthService().getActivityFetcher().addChunk(payload);
         }
     }
 
     @Override
     public void sendCommand(String taskName, XiaomiProto.Command command) {
-        XiaomiSppPacket packet = XiaomiSppPacket.fromXiaomiCommand(command, getAuthService(), frameCounter.getAndIncrement(), false);
+        XiaomiSppPacket packet = XiaomiSppPacket.fromXiaomiCommand(command, mXiaomiSupport.getAuthService(), frameCounter.getAndIncrement(), false);
         LOG.debug("sending packet: {}", packet);
         TransactionBuilder builder = this.commsSupport.createTransactionBuilder("send " + taskName);
         builder.write(packet.encode(encryptionCounter));
@@ -201,7 +211,7 @@ public class XiaomiSppSupport extends XiaomiSupport {
     }
 
     public void sendCommand(final TransactionBuilder builder, final XiaomiProto.Command command) {
-        XiaomiSppPacket packet = XiaomiSppPacket.fromXiaomiCommand(command, getAuthService(), frameCounter.getAndIncrement(), false);
+        XiaomiSppPacket packet = XiaomiSppPacket.fromXiaomiCommand(command, mXiaomiSupport.getAuthService(), frameCounter.getAndIncrement(), false);
         LOG.debug("sending packet: {}", packet);
 
         builder.write(packet.encode(encryptionCounter));

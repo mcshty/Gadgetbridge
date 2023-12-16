@@ -22,7 +22,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.btle.actions.SetDeviceStateA
 import nodomain.freeyourgadget.gadgetbridge.service.btle.actions.SetProgressAction;
 import nodomain.freeyourgadget.gadgetbridge.util.GB;
 
-public class XiaomiBleSupport extends XiaomiSupport {
+public class XiaomiBleSupport extends XiaomiConnectionSupport {
     private static final Logger LOG = LoggerFactory.getLogger(XiaomiBleSupport.class);
 
     private XiaomiCharacteristic characteristicCommandRead;
@@ -30,12 +30,12 @@ public class XiaomiBleSupport extends XiaomiSupport {
     private XiaomiCharacteristic characteristicActivityData;
     private XiaomiCharacteristic characteristicDataUpload;
 
-    private String mFirmwareVersion;
+    private final XiaomiSupport mXiaomiSupport;
 
     final AbstractBTLEDeviceSupport commsSupport = new AbstractBTLEDeviceSupport(LOG) {
         @Override
         public boolean useAutoConnect() {
-            return XiaomiBleSupport.this.useAutoConnect();
+            return mXiaomiSupport.useAutoConnect();
         }
 
         @Override
@@ -44,7 +44,7 @@ public class XiaomiBleSupport extends XiaomiSupport {
         }
 
         @Override
-        protected final TransactionBuilder initializeDevice(final TransactionBuilder builder) {
+        protected TransactionBuilder initializeDevice(final TransactionBuilder builder) {
             XiaomiBleUuids.XiaomiBleUuidSet uuidSet = null;
             BluetoothGattCharacteristic btCharacteristicCommandRead = null;
             BluetoothGattCharacteristic btCharacteristicCommandWrite = null;
@@ -87,8 +87,8 @@ public class XiaomiBleSupport extends XiaomiSupport {
             }
 
             // FIXME unsetDynamicState unsets the fw version, which causes problems..
-            if (getDevice().getFirmwareVersion() == null && XiaomiBleSupport.this.getCachedFirmwareVersion() != null) {
-                getDevice().setFirmwareVersion(XiaomiBleSupport.this.getCachedFirmwareVersion());
+            if (getDevice().getFirmwareVersion() == null && mXiaomiSupport.getCachedFirmwareVersion() != null) {
+                getDevice().setFirmwareVersion(mXiaomiSupport.getCachedFirmwareVersion());
             }
 
             if (btCharacteristicCommandRead == null || btCharacteristicCommandWrite == null) {
@@ -97,19 +97,19 @@ public class XiaomiBleSupport extends XiaomiSupport {
                 return builder;
             }
 
-            XiaomiBleSupport.this.characteristicCommandRead = new XiaomiCharacteristic(XiaomiBleSupport.this, btCharacteristicCommandRead, getAuthService());
+            XiaomiBleSupport.this.characteristicCommandRead = new XiaomiCharacteristic(XiaomiBleSupport.this, btCharacteristicCommandRead, mXiaomiSupport.getAuthService());
             XiaomiBleSupport.this.characteristicCommandRead.setEncrypted(uuidSet.isEncrypted());
-            XiaomiBleSupport.this.characteristicCommandRead.setHandler(XiaomiBleSupport.this::handleCommandBytes);
-            XiaomiBleSupport.this.characteristicCommandWrite = new XiaomiCharacteristic(XiaomiBleSupport.this, btCharacteristicCommandWrite, getAuthService());
+            XiaomiBleSupport.this.characteristicCommandRead.setHandler(mXiaomiSupport::handleCommandBytes);
+            XiaomiBleSupport.this.characteristicCommandWrite = new XiaomiCharacteristic(XiaomiBleSupport.this, btCharacteristicCommandWrite, mXiaomiSupport.getAuthService());
             XiaomiBleSupport.this.characteristicCommandWrite.setEncrypted(uuidSet.isEncrypted());
-            XiaomiBleSupport.this.characteristicActivityData = new XiaomiCharacteristic(XiaomiBleSupport.this, btCharacteristicActivityData, getAuthService());
-            XiaomiBleSupport.this.characteristicActivityData.setHandler(getHealthService().getActivityFetcher()::addChunk);
+            XiaomiBleSupport.this.characteristicActivityData = new XiaomiCharacteristic(XiaomiBleSupport.this, btCharacteristicActivityData, mXiaomiSupport.getAuthService());
+            XiaomiBleSupport.this.characteristicActivityData.setHandler(mXiaomiSupport.getHealthService().getActivityFetcher()::addChunk);
             XiaomiBleSupport.this.characteristicActivityData.setEncrypted(uuidSet.isEncrypted());
-            XiaomiBleSupport.this.characteristicDataUpload = new XiaomiCharacteristic(XiaomiBleSupport.this, btCharacteristicDataUpload, getAuthService());
+            XiaomiBleSupport.this.characteristicDataUpload = new XiaomiCharacteristic(XiaomiBleSupport.this, btCharacteristicDataUpload, mXiaomiSupport.getAuthService());
             XiaomiBleSupport.this.characteristicDataUpload.setEncrypted(uuidSet.isEncrypted());
             XiaomiBleSupport.this.characteristicDataUpload.setIncrementNonce(false);
 
-            XiaomiBleSupport.this.getDataUploadService().setDataUploadCharacteristic(XiaomiBleSupport.this.characteristicDataUpload);
+            mXiaomiSupport.getDataUploadService().setDataUploadCharacteristic(XiaomiBleSupport.this.characteristicDataUpload);
 
             builder.requestMtu(247);
             builder.add(new SetDeviceStateAction(getDevice(), GBDevice.State.INITIALIZING, getContext()));
@@ -119,9 +119,9 @@ public class XiaomiBleSupport extends XiaomiSupport {
             builder.notify(btCharacteristicDataUpload, true);
 
             if (uuidSet.isEncrypted()) {
-                XiaomiBleSupport.this.getAuthService().startEncryptedHandshake(XiaomiBleSupport.this, builder);
+                mXiaomiSupport.getAuthService().startEncryptedHandshake(XiaomiBleSupport.this, builder);
             } else {
-                XiaomiBleSupport.this.getAuthService().startClearTextHandshake(XiaomiBleSupport.this, builder);
+                mXiaomiSupport.getAuthService().startClearTextHandshake(XiaomiBleSupport.this, builder);
             }
 
             return builder;
@@ -155,13 +155,8 @@ public class XiaomiBleSupport extends XiaomiSupport {
         }
     };
 
-    public XiaomiBleSupport() {
-        super.setConnectionSpecificSupport(this);
-    }
-
-    @Override
-    public void setAutoReconnect(boolean enable) {
-        commsSupport.setAutoReconnect(enable);
+    public XiaomiBleSupport(final XiaomiSupport xiaomiSupport) {
+        this.mXiaomiSupport = xiaomiSupport;
     }
 
     public void onAuthSuccess() {
@@ -170,13 +165,17 @@ public class XiaomiBleSupport extends XiaomiSupport {
         characteristicActivityData.reset();
         characteristicDataUpload.reset();
 
-        super.onAuthSuccess();
+        mXiaomiSupport.onAuthSuccess();
     }
 
     @Override
     public void setContext(GBDevice device, BluetoothAdapter adapter, Context context) {
-        super.setContext(device, adapter, context);
         this.commsSupport.setContext(device, adapter, context);
+    }
+
+    @Override
+    public void disconnect() {
+        this.commsSupport.disconnect();
     }
 
     public void sendCommand(final String taskName, final XiaomiProto.Command command) {
@@ -217,10 +216,10 @@ public class XiaomiBleSupport extends XiaomiSupport {
         try {
             final TransactionBuilder builder = commsSupport.createTransactionBuilder("send data upload progress");
             builder.add(new SetProgressAction(
-                    getContext().getString(textRsrc),
+                    commsSupport.getContext().getString(textRsrc),
                     true,
                     progressPercent,
-                    getContext()
+                    commsSupport.getContext()
             ));
             builder.queue(commsSupport.getQueue());
         } catch (final Exception e) {

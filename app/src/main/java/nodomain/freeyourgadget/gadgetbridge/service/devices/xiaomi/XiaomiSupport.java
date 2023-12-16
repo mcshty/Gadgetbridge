@@ -83,7 +83,7 @@ public class XiaomiSupport extends AbstractDeviceSupport {
     private final XiaomiPhonebookService phonebookService = new XiaomiPhonebookService(this);
 
     private String cachedFirmwareVersion = null;
-    private XiaomiSupport connectionSupport = null;
+    private XiaomiConnectionSupport connectionSupport = null;
 
     private final Map<Integer, AbstractXiaomiService> mServiceMap = new LinkedHashMap<Integer, AbstractXiaomiService>() {{
         put(XiaomiAuthService.COMMAND_TYPE, authService);
@@ -109,10 +109,6 @@ public class XiaomiSupport extends AbstractDeviceSupport {
         return false;
     }
 
-    protected void setConnectionSpecificSupport(XiaomiSupport innerSupport) {
-        this.connectionSupport = innerSupport;
-    }
-
     private DeviceCoordinator.ConnectionType getForcedConnectionTypeFromPrefs() {
         final String connTypeAuto = getContext().getString(R.string.pref_force_connection_type_auto_value);
         String connTypePref = getDevicePrefs().getString(PREF_FORCE_CONNECTION_TYPE, connTypeAuto);
@@ -127,7 +123,7 @@ public class XiaomiSupport extends AbstractDeviceSupport {
         return DeviceCoordinator.ConnectionType.BOTH;
     }
 
-    private XiaomiSupport createConnectionSpecificSupport() {
+    private XiaomiConnectionSupport createConnectionSpecificSupport() {
         DeviceCoordinator.ConnectionType connType = getCoordinator().getConnectionType();
 
         if (connType == DeviceCoordinator.ConnectionType.BOTH) {
@@ -136,16 +132,16 @@ public class XiaomiSupport extends AbstractDeviceSupport {
 
         switch (connType) {
             case BT_CLASSIC:
-                return new XiaomiSppSupport();
+                return new XiaomiSppSupport(this);
             default:
                 LOG.error("Unknown connection type {}, defaulting to BLE device support", connType);
             case BLE: // device coordinator inherits from AbstractBtLEDeviceSupport
             case BOTH:
-                return new XiaomiBleSupport();
+                return new XiaomiBleSupport(this);
         }
     }
 
-    public XiaomiSupport getConnectionSpecificSupport() {
+    public XiaomiConnectionSupport getConnectionSpecificSupport() {
         if (connectionSupport == null) {
             connectionSupport = createConnectionSpecificSupport();
         }
@@ -207,7 +203,7 @@ public class XiaomiSupport extends AbstractDeviceSupport {
             service.setContext(context);
         }
 
-        if (getConnectionSpecificSupport() != null && this != getConnectionSpecificSupport()) {
+        if (getConnectionSpecificSupport() != null) {
             getConnectionSpecificSupport().setContext(device, adapter, context);
         }
     }
