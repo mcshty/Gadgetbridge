@@ -63,9 +63,9 @@ public class AmazfitTRexProFirmwareInfo extends HuamiFirmwareInfo {
             return HuamiFirmwareType.RES_COMPRESSED;
         }
         if (ArrayUtils.equals(bytes, FW_HEADER, FW_OFFSET)) {
-            if (searchString32BitAligned(bytes, "Amazfit T-Rex Pro")) {
-                return HuamiFirmwareType.FIRMWARE;
-            }
+            return HuamiFirmwareType.FIRMWARE;
+        }
+
             return HuamiFirmwareType.INVALID;
         }
         if (ArrayUtils.startsWith(bytes, UIHH_HEADER) && (bytes[4] == 1 || bytes[4] == 2)) {
